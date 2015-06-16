@@ -11,7 +11,7 @@ from gevent.threadpool import ThreadPool
 logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s,%(filename)s,%(levelname)s,%(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='log/command.log',
+                filename='/tmp/command.log',
                 filemode='w+')
 
 class SSHClient(object):
