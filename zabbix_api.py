@@ -224,7 +224,7 @@ class zabbix_api(object):
     		"method": "host.create",
     		"params": {
         		"host": hostname,
-			"name": aliasname.decode("gbk").encode("utf8"),
+			"name": aliasname,
         		"interfaces": [
             		{
                 	"type": 1,
@@ -242,7 +242,7 @@ class zabbix_api(object):
 	})
         res = self.get(data)
         return u"添加主机成功! 主机ID: %s\t主机IP: %s\t主机名: %s"\
-               %("".join(res["hostids"]),hostname,aliasname.decode("gbk").encode("utf8"))
+               %("".join(res["hostids"]),hostname,aliasname)
 
     def host_update(self,hostname,templateids):
         data = json.dumps({
@@ -276,11 +276,11 @@ class zabbix_api(object):
             return u"该主机不存在!"
         return status and u"该主机已经被停止监控!" or u"该主机启用监控!"
     
-    def host_delete(self,hostids):
+    def host_delete(self,hostname):
         data = json.dumps({
                 "jsonrpc": "2.0",
                 "method": "host.delete",
-                "params": [{"hostid": i} for i in hostids],
+                "params": map(lambda x: {"hostid": x},map(lambda y: self.host_get(y),hostname)) ,
                 "auth": self.user_login(),
                 "id": 1
         })
@@ -372,9 +372,9 @@ def main(url):
         #gevent.joinall([
         #    gevent.spawn(infile,filename),
         #    gevent.spawn(create),
-        ])
+        #])
         from gevent.threadpool import ThreadPool
-        pool = Threadpool(30)
+        pool = ThreadPool(30)
         for i in open(filename):
             pool.spawn(getattr(api,'host_create'),*i.strip().split(","))
         gevent.wait()
