@@ -11,8 +11,12 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf8")
 
+class ZabbixException(Exception):
+    pass
+
+
 class Zabbix_Api(object):
-    def __init__(self,url,user="Admin",passwd="zabbix",timeout=30):
+    def __init__(self,url,user=None,passwd=None,timeout=30):
         self.url = url+"/api_jsonrpc.php"
 
         self.username = user
@@ -73,8 +77,8 @@ class Zabbix_Api(object):
             return self.zabbix_request(attr1,attr2,params)["result"]
         return func
             
-def main(url):
-    api = Zabbix_Api(url)
+def main(url,user=None,password=None):
+    api = Zabbix_Api(url,user=user,passwd=password)
     api.login()
     parser = argparse.ArgumentParser(description=u"""
 这是一个调用zabbix api的python脚本。
@@ -136,7 +140,7 @@ def main(url):
         status = {"0": "OK", "1": "Disabled"}
         data = api.item("get",{"output": "extend","hostids": args.listitem,"seach": {"key_": "system"},"sortfield": "name"})
         for item in data:
-            print u"监控项ID: {}\t监控项名称: {]\t监控项key: {}\t监控项状态: {}".format(
+            print u"监控项ID: {}\t监控项名称: {}\t监控项key: {}\t监控项状态: {}".format(
                   item["itemid"],item["name"],item["key_"],status[item["status"]])
     elif args.history:
         data = api.histroy("get",{"output": "extend",
@@ -229,4 +233,4 @@ def main(url):
         parser.print_help()
 
 if __name__ == "__main__":
-    main("http://10.100.0.41")
+    main("http://10.100.0.41",user='admin',password='admin')
